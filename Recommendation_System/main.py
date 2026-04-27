@@ -2,18 +2,24 @@ from flask import Flask, request, jsonify
 import numpy as np
 import pandas as pd
 import pickle
-import ast 
+import ast
+import os
 
 app = Flask(__name__)
 
-sym_des = pd.read_csv("datasets/symtoms_df.csv")
-precautions = pd.read_csv("datasets/precautions_df.csv")
-workout = pd.read_csv("datasets/workout_df.csv")
-description = pd.read_csv("datasets/description.csv")
-medications = pd.read_csv('datasets/medications.csv')
-diets = pd.read_csv("datasets/diets.csv")
+# Resolve dataset / model paths relative to this file so the service is
+# cwd-independent (works whether you run it from veil-py/, the project root,
+# or inside the docker container that mounts the folder at /recommendation_system).
+HERE = os.path.dirname(os.path.abspath(__file__))
 
-svc = pickle.load(open('svc.pkl', 'rb'))
+sym_des = pd.read_csv(os.path.join(HERE, "datasets/symtoms_df.csv"))
+precautions = pd.read_csv(os.path.join(HERE, "datasets/precautions_df.csv"))
+workout = pd.read_csv(os.path.join(HERE, "datasets/workout_df.csv"))
+description = pd.read_csv(os.path.join(HERE, "datasets/description.csv"))
+medications = pd.read_csv(os.path.join(HERE, "datasets/medications.csv"))
+diets = pd.read_csv(os.path.join(HERE, "datasets/diets.csv"))
+
+svc = pickle.load(open(os.path.join(HERE, "svc.pkl"), "rb"))
 
 def helper(dis):
     desc = description[description['Disease'] == dis]['Description'].values
@@ -76,4 +82,5 @@ def predict():
         }), 400
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", os.environ.get("FLASK_RUN_PORT", 5001)))
+    app.run(host="0.0.0.0", port=port, debug=True)

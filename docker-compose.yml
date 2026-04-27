@@ -15,6 +15,6 @@ services:
   ai_model:
     build:
       context: .
-      dockerfile: recommendation_system/Dockerfile
+      dockerfile: Recommendation_System/Dockerfile
     volumes:
-      - ./recommendation_system:/recommendation_system
+      - ./Recommendation_System:/recommendation_system
